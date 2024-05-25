@@ -18,7 +18,7 @@ RUN git clone https://github.com/kaspanet/rusty-kaspa.git /rusty-kaspa
 RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git /rusty-kaspa/Gridrustykaspa
 
 # Update Cargo.toml to include API in workspace
-RUN sed -i '/\[workspace\]/a members = ["Gridrustykaspa/api"]' /rusty-kaspa/Cargo.toml
+RUN sed -i '/members = \[/a "Gridrustykaspa/api",' /rusty-kaspa/Cargo.toml
 
 # Build the whole workspace including kaspad and API
 WORKDIR /rusty-kaspa
