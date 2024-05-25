@@ -1,0 +1,5 @@
+name: kaspad
+exec: /usr/local/bin/kaspad
+oneshot: false
+log: stdout
+test: /usr/bin/pgrep kaspad

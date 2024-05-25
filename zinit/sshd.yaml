@@ -1,0 +1,6 @@
+name: sshd
+exec: /usr/sbin/sshd -D
+oneshot: false
+log: stdout
+test: /usr/bin/pgrep sshd
+after: ssh-init

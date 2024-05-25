@@ -1,0 +1,5 @@
+name: api
+exec: /usr/local/bin/api
+oneshot: false
+log: stdout
+test: /usr/bin/pgrep api

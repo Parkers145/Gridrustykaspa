@@ -1,85 +1,105 @@
 ### README.md
 
-# Rusty Kaspa Docker Deployment
 
-This repository provides a Docker configuration for a zero-configuration deployment of the Rusty Kaspa node, web GUI wallet, and mining interface. This setup includes a web server for the wallet interface, NGINX as a reverse proxy, and Supervisor to manage services.
+# Gridrustykaspa
 
-## Goals
+This repository contains the setup for deploying a Kaspa full node and web wallet on a Threefold micro VM using Docker and Zinit for process management.
 
-- **Zero Configuration Deployment**: Simplify the deployment process for Rusty Kaspa.
-- **Web GUI Wallet**: Provide a user-friendly web interface for managing Kaspa wallets.
-- **GUI Mining**: Enable graphical user interface for mining operations.
+## Table of Contents
 
-## Repository
+- [Overview](#overview)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+- [Building and Running](#building-and-running)
+- [API Documentation](#api-documentation)
+- [Zinit Configuration](#zinit-configuration)
+- [Avahi Configuration](#avahi-configuration)
+- [SSH Configuration](#ssh-configuration)
+- [License](#license)
 
-For more information about Rusty Kaspa, visit the [Rusty Kaspa GitHub repository](https://github.com/kaspanet/rusty-kaspa).
+## Overview
 
-## Implementation
+Gridrustykaspa is a Docker-based deployment that includes:
 
-### Dockerfile Overview
+- Rusty Kaspa node (`kaspad`)
+- Custom API built with Actix Web
+- Avahi for mDNS
+- Zinit for managing services
+- OpenSSH server
 
-The Dockerfile sets up the following components:
-- **Rusty Kaspa Node**: Runs the main Kaspa node.
-- **Web Wallet Server**: Serves the wallet interface using `basic-http-server`.
-- **NGINX**: Acts as a reverse proxy to route requests to the web wallet and API.
-- **Supervisor**: Manages and monitors the services to ensure they are always running.
+## Repository Structure
 
-### Build and Run
-
-To build and run the Docker container, execute the following commands:
-
-```sh
-docker build -t my-kaspad-server .
-docker run -d -p 80:80 -p 22:22 -p 4000:4000 my-kaspad-server
+```
+Gridrustykaspa/
+├── Dockerfile
+├── avahi-daemon.conf
+├── kaspa.service
+├── ssh-init.sh
+├── README.md
+├── zinit/
+│   ├── kaspad.yaml
+│   ├── api.yaml
+│   ├── avahi-daemon.yaml
+│   ├── sshd.yaml
+│   └── ssh-init.yaml
+├── api/
+│   ├── Cargo.toml
+│   └── src/
+│       ├── main.rs
+│       ├── auth.rs
+│       └── handlers/
+│           ├── mod.rs
+│           ├── wallet.rs
+│           └── node.rs
+└── docs/
+    ├── api.md
+    ├── zinit.md
+    ├── avahi.md
+    ├── ssh.md
 ```
 
-### Accessing Services
+## Getting Started
 
-- **Web Interface**: Accessible at `http://localhost`.
-- **API**: Accessible through NGINX proxy at `http://localhost/api`.
-- **SSH**: Accessible on port 22.
+### Prerequisites
 
-### Service Logs
+- Docker
+- Git
 
-To view the logs for the running services, use the following commands:
+### Cloning the Repository
 
-- **Kaspad Logs**:
-  ```sh
-  docker exec -it <container_id> tail -f /var/log/kaspad.out.log
-  ```
-
-- **NGINX Logs**:
-  ```sh
-  docker exec -it <container_id> tail -f /var/log/nginx.out.log
-  ```
-
-- **Basic HTTP Server Logs**:
-  ```sh
-  docker exec -it <container_id> tail -f /var/log/basic-http-server.out.log
-  ```
-
-### Accessing the Web Interface
-
-- **Web Wallet**: Visit `http://localhost` in your web browser.
-- **Mining GUI**: Accessible through the web interface if implemented.
-
-## To Do List
-
-1. **Fix Web Servers**: Resolve the "refused to connect" issue with the web servers.
-2. **Determine Additional Applications**: Identify if other applications need to run alongside the current setup.
-3. **Implement GPU Mining**: Explore the possibility of adding GPU mining support and integrating it with the web interface.
-4. **Syncing Issue**: Investigate why Kaspad takes 8 minutes to start syncing and optimize the process.
-5. **SSHD Configuration**: Modify SSHD settings to be more secure and grid-ready, avoiding password-based SSH access.
-
-## Entry Point
-
-The entry point for the Docker container is set to:
 ```sh
-/usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n
+git clone https://github.com/parkers145/Gridrustykaspa.git
+cd Gridrustykaspa
 ```
 
-This ensures Supervisor starts and manages all the necessary services.
+## Building and Running
 
----
+### Building the Docker Image
 
-This README provides a comprehensive guide to deploying and managing the Rusty Kaspa node and associated services using Docker. For more detailed information and updates, refer to the [Rusty Kaspa GitHub repository](https://github.com/kaspanet/rusty-kaspa).
+```sh
+docker build -t grustrkaspad .
+```
+
+### Running the Docker Container
+
+```sh
+docker run --privileged -d -p 80:80 -p 16110:16110 -p 16111:16111 -p 22:22 grustrkaspad
+```
+
+## API Documentation
+
+For detailed API documentation, refer to [API Documentation](docs/api.md).
+
+## Zinit Configuration
+
+For detailed information on Zinit configuration, refer to [Zinit Configuration](docs/zinit.md).
+
+## Avahi Configuration
+
+For detailed information on Avahi configuration, refer to [Avahi Configuration](docs/avahi.md).
+
+## SSH Configuration
+
+For detailed information on SSH configuration, refer to [SSH Configuration](docs/ssh.md).
+
+

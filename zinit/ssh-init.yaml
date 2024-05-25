@@ -1,0 +1,4 @@
+name: ssh-init
+exec: /usr/bin/ssh-init.sh
+oneshot: true
+log: stdout
