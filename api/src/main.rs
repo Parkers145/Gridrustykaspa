@@ -1,20 +1,22 @@
-use actix_files as fs;
-use actix_web::{web, App, HttpServer};
 mod handlers;
-mod auth;
+mod state;
+mod kaspa;
+
+use actix_web::{web, App, HttpServer};
+use state::AppState;
+use env_logger;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    env_logger::init();
+    let app_state = web::Data::new(AppState::new());
+
+    HttpServer::new(move || {
         App::new()
-            .service(fs::Files::new("/", "/usr/local/share/web-wallet").index_file("index.html"))
-            .service(web::scope("/api")
-                .configure(handlers::wallet::init)
-                .configure(handlers::node::init)
-                .configure(auth::init))
-            .wrap_fn(auth::middleware)
+            .app_data(app_state.clone())
+            .configure(handlers::config)
     })
-    .bind("0.0.0.0:80")?
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }

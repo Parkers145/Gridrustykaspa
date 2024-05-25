@@ -1,0 +1,37 @@
+# Stage 1: Build Stage for API
+FROM rust:latest AS api-builder
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.cargo/bin:$PATH"
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    git cmake libssl-dev pkg-config libclang-dev \
+    protobuf-compiler libprotobuf-dev
+
+# Clone the API from your GitHub repository
+RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git /api
+
+# Build the API
+WORKDIR /api/api
+RUN cargo build --release --verbose
+
+# Stage 2: Runtime Stage for API
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy built binary from builder stage
+COPY --from=api-builder /api/api/target/release/api /usr/local/bin/api
+
+# Expose API port
+EXPOSE 4000
+
+# Run the API
+CMD ["/usr/local/bin/api"]

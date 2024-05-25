@@ -14,14 +14,14 @@ RUN apt-get update && apt-get install -y \
 # Clone and build rusty-kaspa from kaspanet repository
 RUN git clone https://github.com/kaspanet/rusty-kaspa.git /rusty-kaspa
 
-# Clone and build the API from your GitHub repository
-RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git /rusty-kaspa/Gridrustykaspa
-
-# Update Cargo.toml to include API in workspace
-RUN sed -i '/members = \[/a "Gridrustykaspa/api",' /rusty-kaspa/Cargo.toml
+# Clone and build the API
+RUN git clone --branch api https://github.com/Parkers145/Gridrustykaspa.git /Gridrustykaspa-api
 
 # Build the whole workspace including kaspad and API
 WORKDIR /rusty-kaspa
+RUN cargo build --release
+
+WORKDIR /Gridrustykaspa-api/api
 RUN cargo build --release
 
 # Stage 2: Runtime Stage
@@ -37,7 +37,10 @@ RUN apt-get update && apt-get install -y \
 
 # Copy built binaries from builder stage
 COPY --from=builder /rusty-kaspa/target/release/kaspad /usr/local/bin/kaspad
-COPY --from=builder /rusty-kaspa/Gridrustykaspa/api/target/release/api /usr/local/bin/api
+COPY --from=builder /Gridrustykaspa-api/api/target/release/api /usr/local/bin/api
+
+# Create log directory
+RUN mkdir -p /var/log
 
 # Install Zinit
 RUN curl -fsSL https://github.com/threefoldtech/zinit/releases/download/v0.2.0/zinit-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
@@ -54,7 +57,7 @@ COPY ssh-init.sh /usr/bin/ssh-init.sh
 RUN chmod +x /usr/bin/ssh-init.sh
 
 # Expose necessary ports
-EXPOSE 80 16110 16111 22
+EXPOSE 80 16110 16111 22 8080
 
 # Use Zinit as the init system
 CMD ["zinit", "init"]
