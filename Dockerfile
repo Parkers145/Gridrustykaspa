@@ -3,24 +3,24 @@ FROM rust:latest AS builder
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+ENV PROTOC=/usr/bin/protoc
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    cmake \
-    libssl-dev \
-    pkg-config \
-    libclang-dev \
-    protobuf-compiler \
-	libprotobuf-dev
+    git cmake libssl-dev pkg-config libclang-dev \
+    protobuf-compiler libprotobuf-dev
 
-# Clone and build rusty-kaspa
+# Verify protoc installation
+RUN protoc --version
+
+# Clone and build rusty-kaspa from kaspanet repository
 RUN git clone https://github.com/kaspanet/rusty-kaspa.git /rusty-kaspa
 WORKDIR /rusty-kaspa
 RUN cargo build --release
 
-# Clone and build the API
-RUN git clone https://github.com/parkers145/Gridrustykaspa.git /api  # Ensure this repository is cloned here
+# Clone and build the API from your GitHub repository
+RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git /api
 WORKDIR /api
 RUN cargo build --release
 
@@ -32,14 +32,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
-    openssh-server \
-    avahi-daemon \
-    avahi-utils \
-    libnss-mdns \
-    ca-certificates \
-    curl \
-    wget \
-    sudo && \
+    openssh-server avahi-daemon avahi-utils libnss-mdns ca-certificates curl wget sudo && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy built binaries from builder stage
