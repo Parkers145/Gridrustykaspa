@@ -8,8 +8,8 @@
 
 # Install build dependencies
 # RUN apt-get update && apt-get install -y \
-    git cmake libssl-dev pkg-config libclang-dev \
-    protobuf-compiler libprotobuf-dev
+#    git cmake libssl-dev pkg-config libclang-dev \
+#    protobuf-compiler libprotobuf-dev
 
 # Clone and build the API
 # RUN git clone --branch api https://github.com/Parkers145/Gridrustykaspa.git /Gridrustykaspa-api
