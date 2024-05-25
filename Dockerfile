@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Copy built binaries from builder stages
-COPY --from=api-builder /Gridrustykaspa-api/api/target/release/api /usr/local/bin/api
+# COPY --from=api-builder /Gridrustykaspa-api/api/target/release/api /usr/local/bin/api
 COPY --from=kaspad-builder /rusty-kaspa/target/release/kaspad /usr/local/bin/kaspad
 
 # Create log directory
