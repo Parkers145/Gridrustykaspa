@@ -58,17 +58,20 @@ async fn status(data: web::Data<AppState>) -> impl Responder {
         HttpResponse::Ok().body("Kaspa node is not running")
     }
 }
-
-async fn get_logs() -> Result<HttpResponse, Error> {
-    let file = File::open("/var/log/kaspad.log").map_err(|e| {
-        actix_web::error::ErrorInternalServerError(format!("Failed to open log file: {}", e))
-    })?;
+async fn get_logs() -> Result<HttpResponse, actix_web::Error> {
+    let file = File::open("/var/log/kaspad.log");
+    let file = match file {
+        Ok(file) => file,
+        Err(e) => {
+            return Ok(HttpResponse::InternalServerError().body(format!("Failed to open log file: {}", e)));
+        }
+    };
 
     let mut reader = BufReader::new(file);
     let mut contents = String::new();
-    reader.read_to_string(&mut contents).map_err(|e| {
-        actix_web::error::ErrorInternalServerError(format!("Failed to read log file: {}", e))
-    })?;
+    if let Err(e) = reader.read_to_string(&mut contents) {
+        return Ok(HttpResponse::InternalServerError().body(format!("Failed to read log file: {}", e)));
+    }
 
     Ok(HttpResponse::Ok().body(contents))
 }
