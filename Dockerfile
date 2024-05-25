@@ -19,8 +19,8 @@ WORKDIR /rusty-kaspa
 RUN cargo build --release
 
 # Clone and build the API from your GitHub repository
-RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git /api
-WORKDIR /api
+RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git 
+WORKDIR Gridrustykaspa/api
 RUN cargo build --release
 
 # Stage 2: Runtime Stage
