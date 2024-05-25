@@ -3,8 +3,7 @@ FROM rust:latest AS builder
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
-ENV PROTOC=/usr/bin/protoc
+ENV PATH="/root/.cargo/bin:$PATH"
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
