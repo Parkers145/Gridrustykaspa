@@ -1,5 +1,25 @@
-# Stage 1: Build Stage for Rusty-Kaspa and API
-FROM rust:latest AS builder
+# Stage 1: Build Stage for the API
+FROM rust:latest AS api-builder
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.cargo/bin:$PATH"
+ENV PROTOC=/usr/bin/protoc
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    git cmake libssl-dev pkg-config libclang-dev \
+    protobuf-compiler libprotobuf-dev
+
+# Clone and build the API
+RUN git clone --branch api https://github.com/Parkers145/Gridrustykaspa.git /Gridrustykaspa-api
+
+# Build the API
+WORKDIR /Gridrustykaspa-api/api
+RUN cargo build --release
+
+# Stage 2: Build Stage for Rusty-Kaspa
+FROM rust:latest AS kaspad-builder
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -14,17 +34,11 @@ RUN apt-get update && apt-get install -y \
 # Clone and build rusty-kaspa from kaspanet repository
 RUN git clone https://github.com/kaspanet/rusty-kaspa.git /rusty-kaspa
 
-# Clone and build the API
-RUN git clone --branch api https://github.com/Parkers145/Gridrustykaspa.git /Gridrustykaspa-api
-
-# Build the whole workspace including kaspad and API
+# Build the whole workspace including kaspad
 WORKDIR /rusty-kaspa
 RUN cargo build --release
 
-WORKDIR /Gridrustykaspa-api/api
-RUN cargo build --release
-
-# Stage 2: Runtime Stage
+# Stage 3: Runtime Stage
 FROM ubuntu:22.04
 
 # Set environment variables
@@ -35,9 +49,9 @@ RUN apt-get update && apt-get install -y \
     openssh-server avahi-daemon avahi-utils libnss-mdns ca-certificates curl wget sudo && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy built binaries from builder stage
-COPY --from=builder /rusty-kaspa/target/release/kaspad /usr/local/bin/kaspad
-COPY --from=builder /Gridrustykaspa-api/api/target/release/api /usr/local/bin/api
+# Copy built binaries from builder stages
+COPY --from=api-builder /Gridrustykaspa-api/api/target/release/api /usr/local/bin/api
+COPY --from=kaspad-builder /rusty-kaspa/target/release/kaspad /usr/local/bin/kaspad
 
 # Create log directory
 RUN mkdir -p /var/log

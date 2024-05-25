@@ -59,7 +59,7 @@ async fn status(data: web::Data<AppState>) -> impl Responder {
     }
 }
 
-async fn get_logs() -> impl Responder {
+async fn get_logs() -> Result<HttpResponse, actix_web::Error> {
     let file = File::open("/var/log/kaspad.log").map_err(|e| {
         HttpResponse::InternalServerError().body(format!("Failed to open log file: {}", e))
     })?;
@@ -70,5 +70,5 @@ async fn get_logs() -> impl Responder {
         HttpResponse::InternalServerError().body(format!("Failed to read log file: {}", e))
     })?;
 
-    HttpResponse::Ok().body(contents)
+    Ok(HttpResponse::Ok().body(contents))
 }
