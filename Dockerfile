@@ -1,26 +1,27 @@
-# Stage 1: Build Stage
+# Stage 1: Build Stage for Rusty-Kaspa and API
 FROM rust:latest AS builder
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/root/.cargo/bin:$PATH"
+ENV PROTOC=/usr/bin/protoc
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     git cmake libssl-dev pkg-config libclang-dev \
     protobuf-compiler libprotobuf-dev
 
-# Verify protoc installation
-RUN protoc --version
-
 # Clone and build rusty-kaspa from kaspanet repository
 RUN git clone https://github.com/kaspanet/rusty-kaspa.git /rusty-kaspa
-WORKDIR /rusty-kaspa
-RUN cargo build --release
 
 # Clone and build the API from your GitHub repository
-RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git 
-WORKDIR Gridrustykaspa/api
+RUN git clone --branch api https://github.com/parkers145/Gridrustykaspa.git /rusty-kaspa/Gridrustykaspa
+
+# Update Cargo.toml to include API in workspace
+RUN sed -i '/\[workspace\]/a members = ["Gridrustykaspa/api"]' /rusty-kaspa/Cargo.toml
+
+# Build the whole workspace including kaspad and API
+WORKDIR /rusty-kaspa
 RUN cargo build --release
 
 # Stage 2: Runtime Stage
@@ -36,7 +37,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy built binaries from builder stage
 COPY --from=builder /rusty-kaspa/target/release/kaspad /usr/local/bin/kaspad
-COPY --from=builder /api/target/release/api /usr/local/bin/api
+COPY --from=builder /rusty-kaspa/Gridrustykaspa/api/target/release/api /usr/local/bin/api
 
 # Install Zinit
 RUN curl -fsSL https://github.com/threefoldtech/zinit/releases/download/v0.2.0/zinit-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
