@@ -25,19 +25,8 @@ Kaspad is the core node implementation for the Kaspa blockchain. It is responsib
 
 ### Kaspad Configuration File
 
-The `kaspad` binary can be configured using a YAML file. Below is an example configuration file:
+The `kaspad` binary can be configured using a YAML file.
 
-```yaml
-network: mainnet
-logLevel: info
-listen: "0.0.0.0:16110"
-rpc:
-  address: "0.0.0.0:16111"
-  username: "yourusername"
-  password: "yourpassword"
-database:
-  path: "/var/lib/kaspad"
-```
 
 - **network**: Specifies the network to connect to (e.g., `mainnet`, `testnet`).
 - **logLevel**: Sets the logging level (`debug`, `info`, `warn`, `error`).
