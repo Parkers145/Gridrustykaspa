@@ -1,85 +1,156 @@
-### README.md
+![GridRustyKaspa](./images/header.png)
 
-# Rusty Kaspa Docker Deployment
+This repository contains the setup for deploying a Kaspa full node and web wallet on a Threefold micro VM using Docker and Zinit for process management.
 
-This repository provides a Docker configuration for a zero-configuration deployment of the Rusty Kaspa node, web GUI wallet, and mining interface. This setup includes a web server for the wallet interface, NGINX as a reverse proxy, and Supervisor to manage services.
+## Table of Contents
 
-## Goals
+- [Overview](#overview)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+- [Building and Running](#building-and-running)
+- [Zinit Configuration](#zinit-configuration)
+- [Avahi Configuration](#avahi-configuration)
+- [SSH Configuration](#ssh-configuration)
+- [Kaspad Configuration](#kaspad-configuration)
+- [Kaspa-wallet Configuration](#kaspa-wallet-configuration)
+- [Kaspa-miner Configuration](#kaspa-miner-configuration)
+- [Rothschild Configuration](#rothschild-configuration)
+- [Simpa Configuration](#simpa-configuration)
+- [basic-http-server Configuration](#basic-http-server-configuration)
 
-- **Zero Configuration Deployment**: Simplify the deployment process for Rusty Kaspa.
-- **Web GUI Wallet**: Provide a user-friendly web interface for managing Kaspa wallets.
-- **GUI Mining**: Enable graphical user interface for mining operations.
+# Overview
 
-## Repository
+Gridrustykaspa is a Docker-based deployment that includes:
 
-For more information about Rusty Kaspa, visit the [Rusty Kaspa GitHub repository](https://github.com/kaspanet/rusty-kaspa).
+- Rusty Kaspa node (`kaspad`)
+- Avahi for mDNS
+- Zinit for managing services
+- OpenSSH server
 
-## Implementation
+## kaspa binaries included in runtime 
 
-### Dockerfile Overview
+This section provides an overview of the binaries copied into Stage 2 of the Docker build for the Gridrustykaspa project. Each binary's functionality is explained to help users understand its purpose within the container.
 
-The Dockerfile sets up the following components:
-- **Rusty Kaspa Node**: Runs the main Kaspa node.
-- **Web Wallet Server**: Serves the wallet interface using `basic-http-server`.
-- **NGINX**: Acts as a reverse proxy to route requests to the web wallet and API.
-- **Supervisor**: Manages and monitors the services to ensure they are always running.
+### Binaries
 
-### Build and Run
+1. **kaspad**
+   - **Path:** `/usr/local/bin/kaspad`
+   - **Description:** `kaspad` is the main node implementation for the Kaspa blockchain. It is responsible for validating transactions, maintaining the blockchain state, and participating in the network by relaying blocks and transactions. It is the core component that ensures the blockchain's integrity and functionality.
 
-To build and run the Docker container, execute the following commands:
+2. **kaspa-wallet**
+   - **Path:** `/usr/local/bin/kaspa-wallet`
+   - **Description:** `kaspa-wallet` is a command-line tool for managing Kaspa wallets. It allows users to create and manage wallet addresses, check balances, and send transactions on the Kaspa network. It provides essential functionalities for interacting with the blockchain from a user's perspective.
 
-```sh
-docker build -t my-kaspad-server .
-docker run -d -p 80:80 -p 22:22 -p 4000:4000 my-kaspad-server
+3. **rothschild**
+   - **Path:** `/usr/local/bin/rothschild`
+   - **Description:** `rothschild` is a utility for managing and monitoring Kaspa node operations. It provides additional tools and interfaces for debugging, monitoring, and controlling the node's behavior. It is especially useful for developers and operators who need to manage multiple nodes or require advanced control features.
+
+4. **simpa**
+   - **Path:** `/usr/local/bin/simpa`
+   - **Description:** `simpa` is a simulation and testing tool for the Kaspa network. It allows developers to create test scenarios, simulate network conditions, and validate the behavior of the Kaspa node under different circumstances. It is used primarily for development and testing purposes.
+
+5. **basic-http-server**
+   - **Path:** `/usr/local/bin/basic-http-server`
+   - **Description:** `basic-http-server` is a simple HTTP server used to serve static content. In the context of Gridrustykaspa, it is used to serve the web wallet interface and other static files required for the web-based interaction with the Kaspa node. It provides an easy way to expose web content from within the container.
+
+6. **kaspa-miner**
+   - **Path:** `/usr/local/bin/kaspa-miner`
+   - **Description:** `kaspa-miner` is a mining client for the Kaspa blockchain. It performs the computational work required to find new blocks, contributing to the network's security and decentralization. The miner can utilize CPU and GPU resources to perform hash calculations, and it includes features for configuring mining intensity and managing mining operations.
+
+## Repository Structure
+
+```
+├── Dockerfile
+├── README.md
+├── avahi-daemon.conf
+├── docs
+│   ├── avahi.md
+│   ├── basic-http-server.md
+│   ├── kaspa-miner.md
+│   ├── kaspa-wallet.md
+│   ├── kaspad.md
+│   ├── rothschild.md
+│   ├── simpa.md
+│   ├── ssh.md
+│   └── zinit.md
+├── images
+│   └── header.png
+├── kaspa.service
+├── monitor.sh
+├── ssh-init.sh
+└── zinit
+    ├── avahi-daemon.yaml
+    ├── basic-http-server.yaml
+    ├── kaspad.yaml
+    ├── monitor.yaml
+    ├── ssh-init.yaml
+    └── sshd.yaml
+
 ```
 
-### Accessing Services
+## Getting Started
 
-- **Web Interface**: Accessible at `http://localhost`.
-- **API**: Accessible through NGINX proxy at `http://localhost/api`.
-- **SSH**: Accessible on port 22.
+### Prerequisites
 
-### Service Logs
+- Docker
+- Git
 
-To view the logs for the running services, use the following commands:
+### Cloning the Repository
 
-- **Kaspad Logs**:
-  ```sh
-  docker exec -it <container_id> tail -f /var/log/kaspad.out.log
-  ```
-
-- **NGINX Logs**:
-  ```sh
-  docker exec -it <container_id> tail -f /var/log/nginx.out.log
-  ```
-
-- **Basic HTTP Server Logs**:
-  ```sh
-  docker exec -it <container_id> tail -f /var/log/basic-http-server.out.log
-  ```
-
-### Accessing the Web Interface
-
-- **Web Wallet**: Visit `http://localhost` in your web browser.
-- **Mining GUI**: Accessible through the web interface if implemented.
-
-## To Do List
-
-1. **Fix Web Servers**: Resolve the "refused to connect" issue with the web servers.
-2. **Determine Additional Applications**: Identify if other applications need to run alongside the current setup.
-3. **Implement GPU Mining**: Explore the possibility of adding GPU mining support and integrating it with the web interface.
-4. **Syncing Issue**: Investigate why Kaspad takes 8 minutes to start syncing and optimize the process.
-5. **SSHD Configuration**: Modify SSHD settings to be more secure and grid-ready, avoiding password-based SSH access.
-
-## Entry Point
-
-The entry point for the Docker container is set to:
 ```sh
-/usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n
+git clone https://github.com/parkers145/Gridrustykaspa.git
+cd Gridrustykaspa
 ```
 
-This ensures Supervisor starts and manages all the necessary services.
+## Building and Running
 
----
+### Building the Docker Image
 
-This README provides a comprehensive guide to deploying and managing the Rusty Kaspa node and associated services using Docker. For more detailed information and updates, refer to the [Rusty Kaspa GitHub repository](https://github.com/kaspanet/rusty-kaspa).
+```sh
+docker build -t Gridrustykaspa .
+```
+
+### Running the Docker Container
+
+```sh
+docker run --privileged -d -p 80:80 -p 16110:16110 -p 16111:16111 -p 22:22 Gridrustykaspa 
+```
+
+## Zinit Configuration
+
+For detailed information on Zinit configuration, refer to [Zinit Configuration](docs/zinit.md).
+
+## Avahi Configuration
+
+For detailed information on Avahi configuration, refer to [Avahi Configuration](docs/avahi.md).
+
+## SSH Configuration
+
+For detailed information on SSH configuration, refer to [SSH Configuration](docs/ssh.md).
+
+## Kaspad Configuration 
+
+For detailed information on kaspad configuration, refer to [kaspad Configuration](docs/kaspad.md).
+
+## Kaspa-wallet Configuration 
+
+For detailed information on kaspa-wallet configuration, refer to [kaspa-wallet Configuration](docs/kaspad.md).
+
+## Kaspa-miner Configuration 
+
+For detailed information on kaspa-miner configuration, refer to [kaspa-wallet Configuration](docs/kaspa-miner.md).
+
+## Rothschild Configuration 
+
+For detailed information on kaspa-miner configuration, refer to [rothschild Configuration](docs/rothschild.md)
+
+## Simba Configuration 
+
+For detailed information on kaspa-miner configuration, refer to [simba Configuration](docs/simba.md)
+
+## basic-http-server Configuration
+
+For detailed information on kaspa-miner configuration, refer to [basic-http-server Configuration](docs/basic-http-server.md)
+
+
+

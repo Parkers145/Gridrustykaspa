@@ -1,0 +1,4 @@
+exec: /usr/local/bin/basic-http-server
+oneshot: false
+logs: stdout
+test: /usr/local/bin/pgrep basic-http-server
