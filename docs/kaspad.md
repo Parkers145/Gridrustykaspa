@@ -125,15 +125,6 @@ zinit restart kaspad
 
 Refer to the API documentation for a complete list of available endpoints and their usage.
 
-## Logs and Monitoring
-
-Logs are essential for monitoring the status and activities of the `kaspad` node. By default, logs are output to `stdout`. You can redirect logs to a file by configuring the `log` option in the `kaspad.yaml` file:
-
-```yaml
-log:
-  path: "/var/log/kaspad.log"
-  level: "info"
-```
 
 To view the logs:
 
