@@ -98,6 +98,7 @@ COPY zinit /etc/zinit
 # Copy avahi-daemon configuration
 COPY avahi-daemon.conf /etc/avahi/avahi-daemon.conf
 COPY kaspa.service /etc/avahi/services/kaspa.service
+COPY kaspa-config.toml /etc/kaspa/kaspa-config.toml
 
 # Copy SSH init script
 COPY ssh-init.sh /usr/local/bin/ssh-init.sh
