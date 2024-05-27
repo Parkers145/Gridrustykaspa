@@ -1,4 +1,4 @@
-exec: /usr/local/bin/kaspad
+exec: /usr/local/bin/kaspad --configfile /etc/kaspa/kaspa-config.toml
 oneshot: false
 log: stdout
 test: pgrep -f kaspad
