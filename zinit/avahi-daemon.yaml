@@ -1,0 +1,5 @@
+name: avahi-daemon
+exec: /usr/sbin/avahi-daemon -D
+oneshot: false
+test: /usr/bin/pgrep avahi-daemon
+

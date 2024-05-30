@@ -1,0 +1,4 @@
+exec: basic-http-server /rusty-kaspa/wallet/wasm/web --addr 0.0.0.0:4000 
+oneshot: false
+logs: stdout
+test: /usr/local/bin/pgrep basic-http-server
